@@ -112,6 +112,7 @@ class RollerShutterTimerMixin:
         await super().async_update(*args, **kwargs)
         # Update the configuration at the same time
         await self.async_fetch_config()
+        await self.async_fetch_position()
 
     async def async_fetch_config(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
         data = await self._execute_command(method="GET",
@@ -123,6 +124,16 @@ class RollerShutterTimerMixin:
             channel = d['channel']
             channel_config = d.copy()
             self._shutter__config_by_channel[channel] = channel_config
+
+    async def async_fetch_position(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
+        data = await self._execute_command(method="GET",
+                                    namespace=Namespace.ROLLER_SHUTTER_POSITION,
+                                    payload={},
+                                    timeout=timeout)
+        positions = data.get('position')
+        for p in positions:
+            channel = p['channel']
+            self._shutter__position_by_channel[channel] = p["position"]
 
     def get_open_timer_duration_millis(self, channel: int = 0, *args, **kwargs) -> int:
         self.check_full_update_done()
