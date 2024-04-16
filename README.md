@@ -191,7 +191,7 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
-#### 0.4.7.0
+#### 0.4.7.0b1
 - Added local-lan encryption capabilities to support newest Meross devices
 - Fixed roller shutter mixin not updating initial position after a full async_update() invocation
 
