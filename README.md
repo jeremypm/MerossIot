@@ -191,11 +191,15 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
-#### 0.4.6.2
-- Fix dependency specification for paho-mqtt and other libraries
+#### 0.4.7.0
+- Added local-lan encryption capabilities to support newest Meross devices
+- Fixed roller shutter mixin not updating initial position after a full async_update() invocation
 
 <details>
     <summary>Older</summary>
+#### 0.4.6.2
+- Fix dependency specification for paho-mqtt and other libraries
+
 #### 0.4.6.0
 - NOTE: this API version breaks backward compatibility with LOGIN method. When upgrading to this version, 
 make sure to pass the new api_base_url value correctly as described in the documentation.
