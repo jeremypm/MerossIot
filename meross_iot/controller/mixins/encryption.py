@@ -3,6 +3,7 @@ from hashlib import md5
 import base64
 from Crypto.Cipher import AES
 from enum import Enum
+from typing import Dict
 
 from meross_iot.model.enums import Namespace
 
@@ -16,7 +17,7 @@ class EncryptionAlg(Enum):
 class EncryptionSuiteMixin(object):
     _execute_command: callable
     _DEFAULT_IV="0000000000000000".encode("utf8")
-    _abilities: dict[str, dict]
+    _abilities: Dict[str, dict]
 
     def __init__(self, device_uuid: str,
                  manager,
