@@ -99,7 +99,7 @@ class TestHttpMethods(AioHTTPTestCase):
     @unittest_run_loop
     async def test_bad_domain(self):
         with self.assertRaises(BadDomainException):
-            return await MerossHttpClient.async_from_user_password(api_base_url="iot.meross.com", email=_TEST_EMAIL, password=_TEST_PASSWORD, auto_retry_on_bad_domain=False)
+            return await MerossHttpClient.async_from_user_password(api_base_url="iotx-ap.meross.com", email=_TEST_EMAIL, password=_TEST_PASSWORD, auto_retry_on_bad_domain=False)
 
 
     @unittest_run_loop

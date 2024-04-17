@@ -77,6 +77,7 @@ jobs:
       id: pytest
       env:
         MEROSS_EMAIL: ${{ secrets.MEROSS_EMAIL }}
+        MEROSS_EMAIL_MFA: ${{ secrets.MEROSS_EMAIL_MFA }}
         MEROSS_PASSWORD: ${{ secrets.MEROSS_PASSWORD }}
       run: |
         pip install .
