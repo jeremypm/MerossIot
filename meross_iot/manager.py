@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import json
 import logging
 import random
@@ -1153,17 +1154,18 @@ def _handle_future(future: Future, result: object, exception: Exception):
             future.set_result(result)
 
 
-def set_future_done(future):
+def set_future_done(coroutine, future):
+    coroutine.close()
     if future in _PENDING_FUTURES:
         _PENDING_FUTURES.remove(future)
 
 
-def _schedule_later(coroutine, start_delay, loop):
-    async def delayed_execution(coro, delay, loop):
-        await asyncio.sleep(delay=delay)
-        await coro
+async def delayed_execution(coro, delay):
+    await asyncio.sleep(delay=delay)
+    await coro
 
-    future = asyncio.run_coroutine_threadsafe(coro=delayed_execution(coro=coroutine, delay=start_delay, loop=loop),
-                                              loop=loop)
+
+def _schedule_later(coroutine, start_delay, loop):
+    future = asyncio.run_coroutine_threadsafe(coro=delayed_execution(coro=coroutine, delay=start_delay), loop=loop)
     _PENDING_FUTURES.append(future)
-    future.add_done_callback(set_future_done)
+    future.add_done_callback(functools.partial(set_future_done,coroutine))
