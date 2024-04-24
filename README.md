@@ -27,7 +27,7 @@ Due to the popularity of the library, I've decided to list it publicly on the Pi
 So, the installation is as simple as typing the following command:
 
 ```bash
-pip install meross_iot==0.4.6.2
+pip install meross_iot==0.4.7.0
 ```
 
 ## Usage & Full Documentation
@@ -191,10 +191,10 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
-#### 0.4.7.0b2
+#### 0.4.7.0
 - Added local-lan encryption capabilities to support newest Meross devices
 - Fixed roller shutter mixin not updating initial position after a full async_update() invocation
-- Attempt to fix #352
+- Fixed #352
 
 <details>
     <summary>Older</summary>
