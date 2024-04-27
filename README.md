@@ -191,13 +191,16 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
+#### 0.4.7.1
+Updated requirements to use pycryptodomex instead of Crypto
+
+<details>
+    <summary>Older</summary>
 #### 0.4.7.0
 - Added local-lan encryption capabilities to support newest Meross devices
 - Fixed roller shutter mixin not updating initial position after a full async_update() invocation
 - Fixed #352
 
-<details>
-    <summary>Older</summary>
 #### 0.4.6.2
 - Fix dependency specification for paho-mqtt and other libraries
 
