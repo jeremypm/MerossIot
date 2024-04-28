@@ -11,13 +11,13 @@ class SystemDndMixin:
     check_full_update_done: callable
 
     ## It looks like the DND mode update/change does not trigger any PUSH notification update.
+    ## This means we won't catch any "DND mode change" via push notifications.
 
     async def async_get_dnd_mode(self, timeout: Optional[float] = None, *args, **kwargs) -> DNDMode:
         """
         Polls the device and retrieves its DO-NOT-DISTURB mode.
         This method will actually refresh the cached DNDMode by issuing a MQTT message to the broker.
-        You should avoid using this method when not strictly needed and rely on the cached DNDMode available
-        via `get_dnd_mode()`.
+        You should avoid using this method when not strictly needed and cache the retrieved DND mode.
         :param timeout:
         :param args:
         :param kwargs:
