@@ -59,7 +59,7 @@ _CONNECTION_DROP_UPDATE_SCHEDULE_INTERVAL = 2
 T = TypeVar("T", bound=BaseDevice)  # Declare type variable
 ManagerPushNotificationHandlerType = Callable[[GenericPushNotification, List[BaseDevice], 'MerossManager'], Awaitable]
 
-_PENDING_FUTURES = []
+_PENDING_FUTURES: List["DelayedCoroFutureHandler"] = []
 
 _DEFAULT_HEADERS = {"Content-Type": "application/json"}
 
@@ -269,9 +269,11 @@ class MerossManager(object):
         _LOGGER.info("Manager stop requested.")
         _LOGGER.debug("Canceling pending futures...")
         for f in _PENDING_FUTURES:
-            if not f.cancelled():
-                f.cancel()
+            f.ensure_canceled()
+        _PENDING_FUTURES.clear()
+
         # Disconnect from all mqtt clients
+        _LOGGER.debug("Disconnecting MQTT clients...")
         for client in self._mqtt_clients.values():
             client.disconnect()
 
@@ -1154,12 +1156,6 @@ def _handle_future(future: Future, result: object, exception: Exception):
             future.set_result(result)
 
 
-def set_future_done(coroutine, future):
-    coroutine.close()
-    if future in _PENDING_FUTURES:
-        _PENDING_FUTURES.remove(future)
-
-
 async def delayed_execution(coro, delay):
     await asyncio.sleep(delay=delay)
     await coro
@@ -1167,5 +1163,15 @@ async def delayed_execution(coro, delay):
 
 def _schedule_later(coroutine, start_delay, loop):
     future = asyncio.run_coroutine_threadsafe(coro=delayed_execution(coro=coroutine, delay=start_delay), loop=loop)
-    _PENDING_FUTURES.append(future)
-    future.add_done_callback(functools.partial(set_future_done,coroutine))
+    _PENDING_FUTURES.append(DelayedCoroFutureHandler(future, coroutine))
+
+
+class DelayedCoroFutureHandler:
+    def __init__(self, future, coroutine):
+        self.future = future
+        self.coro = coroutine
+
+    def ensure_canceled(self):
+        if not self.future.cancelled():
+            self.future.cancel()
+        self.coro.close()
