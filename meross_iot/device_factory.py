@@ -27,7 +27,8 @@ _LOGGER = logging.getLogger(__name__)
 
 _KNOWN_DEV_TYPES_CLASSES = {
     "mts100v3": Mts100v3Valve,
-    "ms100": Ms100Sensor
+    "ms100": Ms100Sensor,
+    "ms100f": Ms100Sensor
 }
 
 _ABILITY_MATRIX = {
@@ -85,7 +86,8 @@ _ABILITY_MATRIX = {
 
 _SUBDEVICE_MAPPING = {
     "mts100v3": Mts100v3Valve,
-    "ms100": Ms100Sensor
+    "ms100": Ms100Sensor,
+    "ms100f": Ms100Sensor
 }
 
 _dynamic_types = {}
@@ -187,12 +189,12 @@ def build_meross_device_from_abilities(http_device_info: HttpDeviceInfo,
         # - HubMerossDevice: to be used when dealing with Hubs.
         # Unfortunately, it's not clear how we should discriminate an hub from a non-hub.
         # The current implementation decides which base class to use by looking at the presence
-        # of 'Appliance.Digest.Hub' namespace within the exposed abilities.
-        discriminating_ability = Namespace.SYSTEM_DIGEST_HUB.value
+        # of 'Appliance.Digest.Hub' or 'Appliance.Hub.SubdeviceList' namespaces within the exposed abilities.
+        discriminating_abilities = [Namespace.SYSTEM_DIGEST_HUB.value, Namespace.HUB_SUBDEVICELIST.value]
         base_class = BaseDevice
-        if discriminating_ability in device_abilities:
+        if any (da in device_abilities for da in discriminating_abilities):
             _LOGGER.warning(f"Device {http_device_info.dev_name} ({http_device_info.device_type}, "
-                            f"uuid {http_device_info.uuid}) reported ability {discriminating_ability}. "
+                            f"uuid {http_device_info.uuid}) reported one ability of {discriminating_abilities}. "
                             f"Assuming this is a full-featured HUB.")
             base_class = HubDevice
 

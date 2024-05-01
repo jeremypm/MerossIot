@@ -122,6 +122,7 @@ class Namespace(Enum):
     HUB_BATTERY = 'Appliance.Hub.Battery'
     HUB_TOGGLEX = 'Appliance.Hub.ToggleX'
     HUB_ONLINE = 'Appliance.Hub.Online'
+    HUB_SUBDEVICELIST = 'Appliance.Hub.SubdeviceList'
 
     # SENSORS
     HUB_SENSOR_ALL = 'Appliance.Hub.Sensor.All'
