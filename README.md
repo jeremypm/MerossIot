@@ -113,7 +113,9 @@ The list of tested devices is the following:
 - MSG100 (Garage opener)
 - MSG200 (3-doors Garage opener)
 - MSH300 (Smart hub + valve thermostat)
+- MSH300HK (Smart Hub)
 - MS100 (Smart hub + temperature/humidity sensor)
+- MS100F (temperature/humidity sensor)
 - MSS710
 - MSXH0 (Smart Humidifier)
 
