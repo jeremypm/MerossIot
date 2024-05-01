@@ -1156,22 +1156,26 @@ def _handle_future(future: Future, result: object, exception: Exception):
             future.set_result(result)
 
 
-async def delayed_execution(coro, delay):
+async def delayed_execution(coro, delay, cancel_event):
     await asyncio.sleep(delay=delay)
-    await coro
+    if not cancel_event.is_set():
+        await coro
 
 
 def _schedule_later(coroutine, start_delay, loop):
-    future = asyncio.run_coroutine_threadsafe(coro=delayed_execution(coro=coroutine, delay=start_delay), loop=loop)
-    _PENDING_FUTURES.append(DelayedCoroFutureHandler(future, coroutine))
+    cancel_event = asyncio.Event()
+    future = asyncio.run_coroutine_threadsafe(coro=delayed_execution(coro=coroutine, delay=start_delay, cancel_event=cancel_event), loop=loop)
+    _PENDING_FUTURES.append(DelayedCoroFutureHandler(future, coroutine, cancel_event))
 
 
 class DelayedCoroFutureHandler:
-    def __init__(self, future, coroutine):
+    def __init__(self, future, coroutine, cancel_event):
         self.future = future
         self.coro = coroutine
+        self.cancel_event = cancel_event
 
     def ensure_canceled(self):
         if not self.future.cancelled():
             self.future.cancel()
         self.coro.close()
+        self.cancel_event.set()
