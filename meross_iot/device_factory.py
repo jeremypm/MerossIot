@@ -189,8 +189,8 @@ def build_meross_device_from_abilities(http_device_info: HttpDeviceInfo,
         # - HubMerossDevice: to be used when dealing with Hubs.
         # Unfortunately, it's not clear how we should discriminate an hub from a non-hub.
         # The current implementation decides which base class to use by looking at the presence
-        # of 'Appliance.Digest.Hub' or 'Appliance.Hub.SubdeviceList' namespaces within the exposed abilities.
-        discriminating_abilities = [Namespace.SYSTEM_DIGEST_HUB.value, Namespace.HUB_SUBDEVICELIST.value]
+        # of 'Appliance.Hub.SubdeviceList': if exposed, we assume the device is a fully featured hub.
+        discriminating_abilities = [Namespace.HUB_SUBDEVICELIST.value]
         base_class = BaseDevice
         if any (da in device_abilities for da in discriminating_abilities):
             _LOGGER.warning(f"Device {http_device_info.dev_name} ({http_device_info.device_type}, "
