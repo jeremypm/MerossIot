@@ -270,6 +270,12 @@ class MerossHttpClient(object):
 
         _LOGGER.info(f"Login successful against {api_base_url}")
 
+        try:
+            response_data["mfaLockExpire"]
+        except NameError:
+            response_data["mfaLockExpire"]=""
+
+
         creds = MerossCloudCreds(
             token=response_data["token"],
             key=response_data["key"],
