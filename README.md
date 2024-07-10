@@ -6,6 +6,11 @@
 [![Downloads](https://pepy.tech/badge/meross-iot)](https://pepy.tech/project/meross-iot)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/meross-iot.svg?label=Pypi%20Downloads)
 
+⚠ !Attention! ⚠
+---
+Meross did change the login API without notice and that caused the library to break. 
+Please make sure to upgrade your library to v0.4.7.3 to fix the issue.
+---
 
 # Meross IoT library
 A pure-python based library providing API for controlling Meross IoT devices over the internet.
@@ -27,7 +32,7 @@ Due to the popularity of the library, I've decided to list it publicly on the Pi
 So, the installation is as simple as typing the following command:
 
 ```bash
-pip install meross_iot==0.4.7.1
+pip install meross_iot==0.4.7.3
 ```
 
 ## Usage & Full Documentation
@@ -193,11 +198,15 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
-#### 0.4.7.1
-Updated requirements to use pycryptodomex instead of Crypto
+### 0.4.7.3
+- Fixes missing `mfaLockExpire` key in login response data due to unexpected API changes from Meross 
+
 
 <details>
     <summary>Older</summary>
+#### 0.4.7.1
+- Updated requirements to use pycryptodomex instead of Crypto
+
 #### 0.4.7.0
 - Added local-lan encryption capabilities to support newest Meross devices
 - Fixed roller shutter mixin not updating initial position after a full async_update() invocation

@@ -277,7 +277,6 @@ class MerossHttpClient(object):
             user_email=response_data["email"],
             domain=response_data["domain"],
             mqtt_domain=response_data["mqttDomain"],
-            mfa_lock_expire=response_data["mfaLockExpire"],
             issued_on=datetime.utcnow()
         )
         if creds_env_var_name is not None:
