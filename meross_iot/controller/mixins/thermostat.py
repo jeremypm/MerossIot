@@ -352,7 +352,7 @@ class ThermostatModeBMixin:
 
     async def async_set_thermostat_config(self,
                                     channel: int = 0,
-                                    mode: Optional[ThermostatMode] = None,
+                                    mode: Optional[ThermostatWorkingMode] = None,
                                     target_temperature_celsius: Optional[float] = None,
                                     on_not_off: Optional[bool] = None,
                                     timeout: Optional[float] = None,
