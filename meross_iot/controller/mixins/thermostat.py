@@ -371,6 +371,7 @@ class ThermostatModeBMixin:
         if on_not_off is not None:
             channel_conf['onoff'] = 1 if on_not_off else 0
 
+        _LOGGER.debug("payload:"+str(payload))
         # This api call will return the updated state of the device. We use it to update the internal state right away.
         result = await self._execute_command(method="SET",
                               namespace=Namespace.CONTROL_THERMOSTAT_MODEB,
