@@ -271,9 +271,9 @@ class ThermostatModeBMixin:
         if namespace == Namespace.CONTROL_THERMOSTAT_MODEB:
             _LOGGER.debug(f"{self.__class__.__name__} handling push notification for namespace "
                           f"{namespace}")
-            mode_data = data.get('modeb')
+            mode_data = data.get('modeB')
             if mode_data is None:
-                _LOGGER.error(f"{self.__class__.__name__} could not find 'modeb' attribute in push notification data: "
+                _LOGGER.error(f"{self.__class__.__name__} could not find 'modeB' attribute in push notification data: "
                               f"{data}")
                 locally_handled = False
             else:
@@ -290,7 +290,7 @@ class ThermostatModeBMixin:
         locally_handled = False
         if namespace == Namespace.SYSTEM_ALL:
             thermostat_data = data.get('all', {}).get('digest', {}).get('thermostat', {})
-            mode_data = thermostat_data.get('modeb')
+            mode_data = thermostat_data.get('modeB')
             if mode_data is not None:
                 self._update_mode(mode_data)
             locally_handled = True
@@ -345,7 +345,7 @@ class ThermostatModeBMixin:
         channel_conf = {
             'channel': channel
         }
-        payload = {'modeb': [channel_conf]}
+        payload = {'modeB': [channel_conf]}
 
         # Arg check
         if mode is not None:
@@ -360,5 +360,5 @@ class ThermostatModeBMixin:
                               namespace=Namespace.CONTROL_THERMOSTAT_MODEB,
                                          payload=payload,
                                          timeout=timeout)
-        mode_data = result.get('modeb')
+        mode_data = result.get('modeB')
         self._update_mode(mode_data)
