@@ -205,15 +205,15 @@ class ThermostatModeMixin:
         """
         # Retrieve the min/max settable values from the state.
         # If this is not available, assume some defaults
-        #channel_state = self._thermostat_state_by_channel.get(channel)
-        #min_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
-        #max_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
-        #if channel_state is not None:
-        #    min_settable_temp = channel_state.min_temperature_celsius
-        #    max_settable_temp = channel_state.max_temperature_celsius
+        channel_state = self._thermostat_state_by_channel.get(channel)
+        min_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
+        max_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
+        if channel_state is not None:
+            min_settable_temp = channel_state.min_temperature_celsius
+            max_settable_temp = channel_state.max_temperature_celsius
 
-        #if temperature < min_settable_temp or temperature > max_settable_temp:
-        #    raise ValueError("The provided temperature value is invalid or out of range for this device.")
+        if temperature < min_settable_temp or temperature > max_settable_temp:
+            raise ValueError("The provided temperature value is invalid or out of range for this device.")
 
         # Round temp value to 0.5
         quotient = temperature/0.5
@@ -334,15 +334,15 @@ class ThermostatModeBMixin:
         """
         # Retrieve the min/max settable values from the state.
         # If this is not available, assume some defaults
-        channel_state = self._thermostat_state_by_channel.get(channel)
-        min_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
-        max_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
-        if channel_state is not None:
-            min_settable_temp = channel_state.min_temperature_celsius
-            max_settable_temp = channel_state.max_temperature_celsius
+        # channel_state = self._thermostat_state_by_channel.get(channel)
+        # max_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
+        # min_settable_temp = _THERMOSTAT_MIN_SETTABLE_TEMP
+        # if channel_state is not None:
+        #     min_settable_temp = channel_state.min_temperature_celsius
+        #     max_settable_temp = channel_state.max_temperature_celsius
 
-        if temperature < min_settable_temp or temperature > max_settable_temp:
-            raise ValueError("The provided temperature value is invalid or out of range for this device.")
+        # if temperature < min_settable_temp or temperature > max_settable_temp:
+        #     raise ValueError("The provided temperature value is invalid or out of range for this device.")
 
         # Round temp value to 0.5
         quotient = temperature/0.5
