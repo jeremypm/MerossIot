@@ -80,6 +80,7 @@ _ABILITY_MATRIX = {
 
     # Thermostat
     Namespace.CONTROL_THERMOSTAT_MODE.value: ThermostatModeMixin,
+    Namespace.CONTROL_THERMOSTAT_MODEB.value: ThermostatModeBMixin,
 
     # TODO: BIND, UNBIND, ONLINE, WIFI, ETC!
 }
