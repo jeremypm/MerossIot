@@ -139,6 +139,9 @@ class Namespace(Enum):
     CONTROL_THERMOSTAT_MODE = 'Appliance.Control.Thermostat.Mode'
     CONTROL_THERMOSTAT_WINDOWOPENED = 'Appliance.Control.Thermostat.WindowOpened'
 
+    # Thermostat / MTS960
+    CONTROL_THERMOSTAT_MODEB = 'Appliance.Control.Thermostat.ModeB'
+
 
 def get_or_parse_namespace(namespace: Union[Namespace, str]):
     if isinstance(namespace, str):
