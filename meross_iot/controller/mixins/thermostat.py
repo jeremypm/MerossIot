@@ -2,7 +2,7 @@ import logging
 from typing import Optional, List, Dict
 
 from meross_iot.controller.device import ChannelInfo
-from meross_iot.model.enums import Namespace, ThermostatMode
+from meross_iot.model.enums import Namespace, ThermostatMode, ThermostatWorkingMode, ThermostatState
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,6 +40,22 @@ class ThermostatState:
         if mode is None:
             return None
         return ThermostatMode(mode)
+
+    @property
+    def workingMode(self) -> Optional[ThermostatWorkingMode]:
+        """The current thermostat working mode"""
+        mode = self._state.get('working')
+        if mode is None:
+            return None
+        return ThermostatWorkingMode(mode)
+
+    @property
+    def state(self) -> Optional[ThermostatState]:
+        """The current thermostat state"""
+        state = self._state.get('state')
+        if state is None:
+            return None
+        return ThermostatState(state)
 
     @property
     def warning(self) -> Optional[bool]:

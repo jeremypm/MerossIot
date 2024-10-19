@@ -55,6 +55,16 @@ class ThermostatMode(Enum):
     MANUAL = 4
 
 
+class ThermostatWorkingMode(Enum):
+    HEAT = 1
+    COOL = 2
+
+
+class ThermostatState(Enum):
+    HEATING_COOLING = 1
+    NOT_HEATING_COOLING = 2
+
+
 class RollerShutterState(Enum):
     UNKNOWN = -1
     IDLE = 0
