@@ -366,7 +366,7 @@ class ThermostatModeBMixin:
         # Arg check
         if mode is not None:
             channel_conf['mode'] = mode.value
-        if manual_temperature_celsius is not None:
+        if target_temperature_celsius is not None:
             channel_conf['targetTemp'] = self._align_temp(target_temperature_celsius, channel=channel)
         if on_not_off is not None:
             channel_conf['onoff'] = 1 if on_not_off else 0
