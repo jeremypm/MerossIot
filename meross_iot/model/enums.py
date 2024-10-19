@@ -60,7 +60,7 @@ class ThermostatWorkingMode(Enum):
     COOL = 2
 
 
-class ThermostatState(Enum):
+class ThermostatModeBState(Enum):
     HEATING_COOLING = 1
     NOT_HEATING_COOLING = 2
 
