@@ -55,6 +55,16 @@ class ThermostatMode(Enum):
     MANUAL = 4
 
 
+class ThermostatWorkingMode(Enum):
+    HEAT = 1
+    COOL = 2
+
+
+class ThermostatModeBState(Enum):
+    HEATING_COOLING = 1
+    NOT_HEATING_COOLING = 2
+
+
 class RollerShutterState(Enum):
     UNKNOWN = -1
     IDLE = 0
@@ -138,6 +148,9 @@ class Namespace(Enum):
     # Thermostat / MTS200
     CONTROL_THERMOSTAT_MODE = 'Appliance.Control.Thermostat.Mode'
     CONTROL_THERMOSTAT_WINDOWOPENED = 'Appliance.Control.Thermostat.WindowOpened'
+
+    # Thermostat / MTS960
+    CONTROL_THERMOSTAT_MODEB = 'Appliance.Control.Thermostat.ModeB'
 
 
 def get_or_parse_namespace(namespace: Union[Namespace, str]):
