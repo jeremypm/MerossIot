@@ -15,7 +15,7 @@ from meross_iot.controller.mixins.roller_shutter import RollerShutterTimerMixin
 from meross_iot.controller.mixins.runtime import SystemRuntimeMixin
 from meross_iot.controller.mixins.spray import SprayMixin
 from meross_iot.controller.mixins.system import SystemAllMixin, SystemOnlineMixin
-from meross_iot.controller.mixins.thermostat import ThermostatModeMixin
+from meross_iot.controller.mixins.thermostat import ThermostatModeMixin, ThermostatModeBMixin
 from meross_iot.controller.mixins.toggle import ToggleXMixin, ToggleMixin
 from meross_iot.controller.subdevice import Mts100v3Valve, Ms100Sensor
 from meross_iot.model.enums import Namespace
@@ -80,6 +80,7 @@ _ABILITY_MATRIX = {
 
     # Thermostat
     Namespace.CONTROL_THERMOSTAT_MODE.value: ThermostatModeMixin,
+    Namespace.CONTROL_THERMOSTAT_MODEB.value: ThermostatModeBMixin,
 
     # TODO: BIND, UNBIND, ONLINE, WIFI, ETC!
 }

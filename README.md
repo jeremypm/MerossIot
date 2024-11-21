@@ -199,12 +199,15 @@ Anyway, feel free to contribute via donations!
 </p>
 
 ## Changelog
-### 0.4.7.3
-- Fixes missing `mfaLockExpire` key in login response data due to unexpected API changes from Meross 
-
+### 0.4.7.5
+- Adds support for MTS960, addressing #337
 
 <details>
     <summary>Older</summary>
+
+### 0.4.7.3
+- Fixes missing `mfaLockExpire` key in login response data due to unexpected API changes from Meross 
+
 #### 0.4.7.1
 - Updated requirements to use pycryptodomex instead of Crypto
 
