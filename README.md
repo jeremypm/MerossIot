@@ -111,6 +111,7 @@ The list of tested devices is the following:
 - MSL120 (RGB Bulb)
 - MSS110 (Smart plug)
 - MSS210 (Smart plug)
+- MSS305 (Smart plug with power consumption)
 - MSS310 (Smart plug with power consumption)
 - MSS310h (Smart plug with power consumption)
 - MSS425E/MSS425F (Smart strip)
