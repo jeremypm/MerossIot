@@ -448,7 +448,7 @@ class MerossHttpClient(object):
         """
         data = {
             "system":platform.system(),
-            "vendor": "meross" if not "bbsolar.cc" in url.lower() else "bbsolar",
+            "vendor": "meross" if not "bbsolar.cc" in creds.domain.lower() else "bbsolar",
             "uuid": log_identifier,
             "extra":"",
             "model":platform.machine(),
