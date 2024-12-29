@@ -1,6 +1,7 @@
 import logging
 from typing import Optional, Union
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.controller.mixins.toggle import ToggleMixin, ToggleXMixin
 from meross_iot.model.enums import Namespace, LightMode
 from meross_iot.model.plugin.light import LightInfo
@@ -10,7 +11,7 @@ from meross_iot.utilities.conversion import rgb_to_int
 _LOGGER = logging.getLogger(__name__)
 
 
-class LightMixin(object):
+class LightMixin(DynamicFilteringMixin):
     """
     Mixin class that enables light control.
     """
@@ -27,6 +28,10 @@ class LightMixin(object):
         # Dictionary keeping the status for every channel
         self._channel_light_status = {}
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.CONTROL_LIGHT.value
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         locally_handled = False
 

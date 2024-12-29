@@ -1,13 +1,14 @@
 import logging
 from typing import Optional, List
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.controller.device import ChannelInfo
 from meross_iot.model.enums import Namespace
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class GarageOpenerMixin:
+class GarageOpenerMixin(DynamicFilteringMixin):
     _channels: List[ChannelInfo]
     _execute_command: callable
     check_full_update_done: callable
@@ -24,7 +25,11 @@ class GarageOpenerMixin:
         for c in self._channels:
             self._door_open_state_by_channel[c.index] = None
             self._door_config_state_by_channel[c.index] = None
-
+    
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.GARAGE_DOOR_STATE.value
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         locally_handled = False
 

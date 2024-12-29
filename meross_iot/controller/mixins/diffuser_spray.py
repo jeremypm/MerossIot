@@ -1,13 +1,14 @@
 import logging
 from typing import Optional
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.model.enums import Namespace, DiffuserSprayMode
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class DiffuserSprayMixin(object):
+class DiffuserSprayMixin(DynamicFilteringMixin):
     _execute_command: callable
     check_full_update_done: callable
 
@@ -19,6 +20,10 @@ class DiffuserSprayMixin(object):
         # Dictionary keeping the status for every channel
         self._channel_diffuser_spray_status = {}
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.DIFFUSER_SPRAY.value
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         locally_handled = False
 

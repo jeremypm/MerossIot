@@ -1,12 +1,13 @@
 import logging
 from typing import Optional, Dict
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.model.enums import Namespace, RollerShutterState
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class RollerShutterTimerMixin:
+class RollerShutterTimerMixin(DynamicFilteringMixin):
     _execute_command: callable
     check_full_update_done: callable
     uuid: str
@@ -22,6 +23,10 @@ class RollerShutterTimerMixin:
         self._shutter__position_by_channel = {}
         self._shutter__config_by_channel = {}
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.ROLLER_SHUTTER_STATE.value
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         locally_handled = False
 
