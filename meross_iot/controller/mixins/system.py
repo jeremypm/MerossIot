@@ -1,12 +1,13 @@
 import logging
 from typing import Optional
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.model.enums import Namespace, OnlineStatus
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class SystemAllMixin(object):
+class SystemAllMixin(DynamicFilteringMixin):
     _execute_command: callable
     #async_handle_update: Callable[[Namespace, dict], Awaitable]
 
@@ -14,7 +15,10 @@ class SystemAllMixin(object):
                  manager,
                  **kwargs):
         super().__init__(device_uuid=device_uuid, manager=manager, **kwargs)
-
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.SYSTEM_ALL.value
+    
     async def async_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
         # Call the super implementation
         await super().async_update(timeout=timeout, *args, **kwargs)
@@ -28,7 +32,7 @@ class SystemAllMixin(object):
         await self.async_handle_update(namespace=Namespace.SYSTEM_ALL, data=result)
 
 
-class SystemOnlineMixin(object):
+class SystemOnlineMixin(DynamicFilteringMixin):
     _online: OnlineStatus
     #async_handle_update: Callable[[Namespace, dict], Awaitable]
 
@@ -37,6 +41,10 @@ class SystemOnlineMixin(object):
                  **kwargs):
         super().__init__(device_uuid=device_uuid, manager=manager, **kwargs)
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.SYSTEM_ONLINE.value
+    
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
         locally_handled = False

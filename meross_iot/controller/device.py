@@ -317,12 +317,11 @@ class BaseDevice(object):
         basic_info = f"{self.name} ({self.type}, HW {self.hardware_version}, FW {self.firmware_version}, class: {self.__class__.__name__})"
         return basic_info
 
-    @staticmethod
-    def _parse_channels(channel_data: List) -> List[ChannelInfo]:
+    def _parse_channels(self,channel_data: List) -> List[ChannelInfo]:
         res = []
         if channel_data is None:
             return res
-
+        
         for i, val in enumerate(channel_data):
             name = val.get('devName', 'Main channel')
             type = val.get('type')

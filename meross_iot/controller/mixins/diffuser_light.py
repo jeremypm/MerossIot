@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.model.enums import Namespace, DiffuserLightMode
 from meross_iot.model.typing import RgbTuple
 from meross_iot.utilities.conversion import rgb_to_int, int_to_rgb
@@ -8,7 +9,7 @@ from meross_iot.utilities.conversion import rgb_to_int, int_to_rgb
 _LOGGER = logging.getLogger(__name__)
 
 
-class DiffuserLightMixin(object):
+class DiffuserLightMixin(DynamicFilteringMixin):
     _execute_command: callable
     check_full_update_done: callable
 
@@ -19,7 +20,11 @@ class DiffuserLightMixin(object):
 
         # Dictionary keeping the status for every channel
         self._channel_diffuser_light_status = {}
-
+    
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.DIFFUSER_LIGHT.value
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         locally_handled = False
 

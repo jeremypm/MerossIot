@@ -1,6 +1,7 @@
 import logging
 from typing import Optional, List, Dict
 
+from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.controller.device import ChannelInfo
 from meross_iot.model.enums import Namespace, ThermostatMode, ThermostatWorkingMode, ThermostatModeBState
 
@@ -130,7 +131,7 @@ class ThermostatState:
         return float(temp)/10.0
 
 
-class ThermostatModeMixin:
+class ThermostatModeMixin(DynamicFilteringMixin):
     _execute_command: callable
     check_full_update_done: callable
     _thermostat_state_by_channel: Dict[int, ThermostatState]
@@ -141,6 +142,10 @@ class ThermostatModeMixin:
         super().__init__(device_uuid=device_uuid, manager=manager, **kwargs)
         self._thermostat_state_by_channel = {}
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.CONTROL_THERMOSTAT_MODE.value
+    
     def _update_mode(self, mode_data: Dict):
         # The MTS200 thermostat does bring a object for every sensor/channel it handles.
         for c in mode_data:
@@ -259,7 +264,7 @@ class ThermostatModeMixin:
         mode_data = result.get('mode')
         self._update_mode(mode_data)
 
-class ThermostatModeBMixin:
+class ThermostatModeBMixin(DynamicFilteringMixin):
     _execute_command: callable
     check_full_update_done: callable
     _thermostat_state_by_channel: Dict[int, ThermostatState]
@@ -270,6 +275,10 @@ class ThermostatModeBMixin:
         super().__init__(device_uuid=device_uuid, manager=manager, **kwargs)
         self._thermostat_state_by_channel = {}
 
+    @staticmethod
+    def filter(device_ability : str, device_name : str,**kwargs):
+        return device_ability == Namespace.CONTROL_THERMOSTAT_MODEB.value
+    
     def _update_mode(self, mode_data: Dict):
         # The MTS200 thermostat does bring a object for every sensor/channel it handles.
         for c in mode_data:
