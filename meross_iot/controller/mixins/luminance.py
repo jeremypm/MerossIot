@@ -4,7 +4,6 @@ from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 from meross_iot.controller.mixins.toggle import ToggleMixin, ToggleXMixin
 from meross_iot.model.enums import Namespace, LightMode
 from meross_iot.model.plugin.light import LightInfo
-from meross_iot.model.typing import RgbwTuple
 from meross_iot.controller.device import ChannelInfo
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ class LuminanceMixin(DynamicFilteringMixin):
         super().__init__(device_uuid=device_uuid, manager=manager, **kwargs)
 
         # Dictionary keeping the status for every channel
-        self._channel_light_status = {}
+        self._channel_luminance_status = {}
     
     @staticmethod
     def filter(device_ability, device_name,**kwargs):
@@ -43,7 +42,7 @@ class LuminanceMixin(DynamicFilteringMixin):
                 locally_handled = False
             else:
                 # Convert the weird array we get into a sane list
-                self._channel_light_status.update({item['channel']:item['value'] for item in payload}) 
+                self._channel_luminance_status.update({item['channel']:item['value'] for item in payload}) 
                 # Update the status of every channel that has been reported in this push
                 # notification.
                 #c = payload['channel']
@@ -68,7 +67,7 @@ class LuminanceMixin(DynamicFilteringMixin):
                 locally_handled = False
             else:
                 # Convert the weird array we get into a sane list
-                self._channel_light_status.update({item['channel']:item['value'] for item in payload}) 
+                self._channel_luminance_status.update({item['channel']:item['value'] for item in payload}) 
                 locally_handled = True
         
         super_handled = await super().async_handle_update(namespace=namespace, data=data)
@@ -94,7 +93,7 @@ class LuminanceMixin(DynamicFilteringMixin):
                                         payload={"control":payload},
                                         timeout=timeout)
             # Update local state
-            self._channel_light_status.update(channelList)
+            self._channel_luminance_status.update(channelList)
     
     async def async_set_luminance(self,
                                   channel: int = 0,
@@ -111,7 +110,7 @@ class LuminanceMixin(DynamicFilteringMixin):
         :return: an integer value from 0 to 100
         """
         self.check_full_update_done()
-        luminance = self._channel_light_status.get(channel)
+        luminance = self._channel_luminance_status.get(channel)
         if luminance is None:
             return None
         return luminance
