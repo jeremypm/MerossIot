@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from meross_iot.controller.device import BaseDevice
 from meross_iot.model.enums import Namespace
 from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 _LOGGER = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ class ToggleXMixin(ToggleMixin):
 
         # Always call the parent handler when done with local specific logic. This gives the opportunity to all
         # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
+        parent_handled = await BaseDevice.async_handle_push_notification(self,namespace=namespace, data=data)
         return locally_handled or parent_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
@@ -139,7 +140,7 @@ class ToggleXMixin(ToggleMixin):
                 self._channel_togglex_status[channel] = switch_state
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
+        super_handled = await BaseDevice.async_handle_update(self,namespace=namespace, data=data)
         return super_handled or locally_handled
 
     def is_on(self, channel=0, *args, **kwargs) -> Optional[bool]:
