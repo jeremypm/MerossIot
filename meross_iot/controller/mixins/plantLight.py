@@ -3,7 +3,7 @@ from typing import Optional, Union
 from meross_iot.controller.mixins.utilities import ChannelRemappingMixin
 from meross_iot.controller.mixins.toggle import ToggleXMixin
 from meross_iot.controller.mixins.luminance import LuminanceMixin
-from meross_iot.controller.device import BaseDevice
+from meross_iot.controller.mixins.light import LightMixin
 from meross_iot.model.enums import Namespace, LightMode
 from meross_iot.model.plugin.light import LightInfo
 from meross_iot.model.typing import RgbTuple
@@ -11,7 +11,7 @@ from meross_iot.controller.device import ChannelInfo
 
 _LOGGER = logging.getLogger(__name__)
 
-class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
+class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMixin):
     """
     Mixin class that enables light control for BBSolar Smart Plant Lights.
     """
@@ -37,9 +37,11 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
         return device_name == 'bgl120a'
 
     def remap(self,channelInfo):
-        return [ChannelInfo(index=0, name="Main Channel", channel_type=type, is_master_channel=True),
+        return [
+                #ChannelInfo(index=0, name="Main Channel", channel_type=type, is_master_channel=True),
                 ChannelInfo(index=1, name="Light A", channel_type=type, is_master_channel=False),
-                ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)]
+                ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)
+                ]
     
     def _update_channel_status(self,
                                channel: int = 0,
@@ -98,6 +100,7 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
                                     onoff: Optional[bool] = None,
                                     rgb: Optional[RgbTuple] = None,
                                     luminance: Optional[int] = None,
+                                    temperature: Optional[int] = None,
                                     timeout: Optional[float] = None,
                                     *args,
                                     **kwargs) -> None:
@@ -150,18 +153,33 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
 
         else:
             _LOGGER.warning(f"Cannot set values for indvidual LED's")
-
-    def get_rgb_color(self, channel=0, *args, **kwargs) -> Optional[RgbTuple]:
+        
+    def get_supports_rgb(self, channel: int = 0) -> bool:
         """
-        Returns the current RGB configuration of the device.
+        Tells if the current device supports RGB capability
 
-        :param channel: channel to control, defaults to 0 (bulbs generally have only one channel)
+        :param channel: channel to get info from, defaults to 0
 
-        :return: a Tuple containing three integer 8bits values (red, green, blue)
+        :return: True if the current device supports RGB color, False otherwise.
         """
-        self.check_full_update_done()
-        info = self._channel_light_status.get(channel)
-        if info is None:
-            return None
-        return info.rgb_tuple
-    
+        return True
+
+    def get_supports_luminance(self, channel: int = 0) -> bool:
+        """
+        Tells if the current device supports luminance capability
+
+        :param channel: channel to get info from, defaults to 0
+
+        :return: True if the current device supports luminance mode, False otherwise.
+        """
+        return True
+
+    def get_supports_temperature(self, channel: int = 0) -> bool:
+        """
+        Tells if the current device supports temperature color capability
+
+        :param channel: channel to get info from, defaults to 0
+
+        :return: True if the current device supports temperature mode, False otherwise.
+        """
+        return False
