@@ -172,10 +172,8 @@ class ThermostatModeMixin(DynamicFilteringMixin):
                 self._update_mode(mode_data)
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
@@ -187,8 +185,7 @@ class ThermostatModeMixin(DynamicFilteringMixin):
                 self._update_mode(mode_data)
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     def get_thermostat_state(self, channel: int = 0, *args, **kwargs) -> Optional[ThermostatState]:
         """
@@ -305,10 +302,8 @@ class ThermostatModeBMixin(DynamicFilteringMixin):
                 self._update_mode(mode_data)
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
@@ -320,8 +315,7 @@ class ThermostatModeBMixin(DynamicFilteringMixin):
                 self._update_mode(mode_data)
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     def get_thermostat_state(self, channel: int = 0, *args, **kwargs) -> Optional[ThermostatState]:
         """

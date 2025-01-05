@@ -23,7 +23,7 @@ else:
 
 # logging.getLogger("meross_iot").setLevel(logging.DEBUG)
 
-class TestLight(AioHTTPTestCase):
+class TestLuminance(AioHTTPTestCase):
     async def get_application(self):
         return web.Application()
 
