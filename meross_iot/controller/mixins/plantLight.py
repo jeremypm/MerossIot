@@ -38,7 +38,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
 
     def remap(self,channelInfo):
         return [
-                #ChannelInfo(index=0, name="Main Channel", channel_type=type, is_master_channel=True),
+                ChannelInfo(index=0, name="Main Channel", channel_type=type, is_master_channel=True),
                 ChannelInfo(index=1, name="Light A", channel_type=type, is_master_channel=False),
                 ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)
                 ]
