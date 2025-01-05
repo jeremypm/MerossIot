@@ -11,7 +11,6 @@ from meross_iot.controller.device import ChannelInfo
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
     """
     Mixin class that enables light control for BBSolar Smart Plant Lights.
@@ -39,47 +38,61 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
 
     def remap(self,channelInfo):
         return [ChannelInfo(index=0, name="Main Channel", channel_type=type, is_master_channel=True),
-                ChannelInfo(index=0, name="Light A", channel_type=type, is_master_channel=False),
-                ChannelInfo(index=1, name="Light B", channel_type=type, is_master_channel=False)]
+                ChannelInfo(index=1, name="Light A", channel_type=type, is_master_channel=False),
+                ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)]
     
     def _update_channel_status(self,
                                channel: int = 0,
                                onoff: int = None) -> None:
-        realChannel = channel * 4 + 2
+        realChannel = (channel * 4) - 1
         channel_info = self._channel_light_status.get(channel)
         if channel_info is None:
-            channel_info = LightInfo()
+            channel_info = LightInfo(luminance=0)
             self._channel_light_status[channel] = channel_info
-        # Stripe the channel list so we can use absolute offsets
-        chanData = self._channel_luminance_status[realChannel : ]
-        channel_info.update(rgb=[chanData[self.RED_OFFSET],chanData[0],chanData[self.BLUE_OFFSET]], luminance=chanData[self.WHITE_OFFSET], onoff=onoff)
 
+        rgb = None
+        luminance = self._channel_luminance_status.get(realChannel + self.WHITE_OFFSET,self._channel_light_status[channel].luminance)
+        if luminance != None:
+            scaleFactor = luminance / 100.0
+        else:
+            scaleFactor = 1.0
+        # We may not receive all updates right at the startup, so we need to check if the relevant channels exist. However,
+        # the lights will always return the range of channels relevant to a single light
+        if realChannel in self._channel_luminance_status:
+            rgb = (self._channel_luminance_status[realChannel + self.RED_OFFSET]/scaleFactor,
+                0,
+                self._channel_luminance_status[realChannel + self.BLUE_OFFSET]/scaleFactor)
+        channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
+    
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
-        locally_handled = False
+        _LOGGER.debug(f"Handling {__name__} mixin data update. Namespace: {namespace} Data: {data}")
+
         parent_handled = await LuminanceMixin.async_handle_push_notification(self,namespace=namespace, data=data)
         parent_handled2 = await ToggleXMixin.async_handle_push_notification(self,namespace=namespace, data=data) 
         # Update local cache - We do this in a really stupid way
         self._update_channel_status(1)
         self._update_channel_status(2)
 
-        return locally_handled or parent_handled or parent_handled2
+        return parent_handled or parent_handled2
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
-        _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update. Data: {data}")
+        _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update. Namespace: {namespace} Data: {data}")
         # Force the update order: we need to update the local state for the luminance and toggleX mixins, then can rely
         # on their labor
-        LuminanceMixin.async_handle_update(self,namespace,data)
-        ToggleXMixin.async_handle_update(self,namespace,data)
+        if namespace == Namespace.CONTROL_LUMINANCE:
+            await LuminanceMixin.async_handle_update(self,namespace,data)
+        else:
+            await ToggleXMixin.async_handle_update(self,namespace,data)
 
         # Update local cache - We do this in a really stupid way
         self._update_channel_status(1)
         self._update_channel_status(2)
                                     
-        locally_handled = True
+        return True
+    
+    async def _async_request_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
+        await self.async_update_multiple_luminance_channels(range(3,11),timeout = 1)
         
-        super_handled = await BaseDevice.async_handle_update(self,namespace=namespace, data=data)
-        return super_handled or locally_handled
-
     async def async_set_light_color(self,
                                     channel: int = 0,
                                     onoff: Optional[bool] = None,
@@ -117,7 +130,7 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
                 else:
                     await self.async_turn_off(channel, timeout=timeout)
         if channel <= 2:
-            realChannel = channel * 4 + 2
+            realChannel = (channel * 4) - 1
 
             # These lights don't seem to have a master luminance channel, we have to do it ourselves. However, the white channel is always
             # at 100%, so we use it as a point-of-reference. 
@@ -127,12 +140,10 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
                 
             # Handle color updates        
             if rgb is None:
-                rgb = self._channel_light_status[channel].rgb
+                rgb = self._channel_light_status[channel].rgb_tuple
                 # Scale 
                 scaleFactor = luminance / 100.0
-                rgb[0] = int(rgb[0] * scaleFactor)
-                rgb[1] = int(rgb[1] * scaleFactor)
-                rgb[2] = int(rgb[2] * scaleFactor)
+                rgb = (int(rgb[0] * scaleFactor), int(rgb[1] * scaleFactor), int(rgb[2] * scaleFactor))
 
             # Send update
             await self.async_bulk_set_luminance({realChannel + self.WHITE_OFFSET: luminance, realChannel + self.RED_OFFSET: rgb[0], realChannel + self.BLUE_OFFSET: rgb[2]},timeout)
@@ -153,3 +164,4 @@ class PlantLightMixin(ChannelRemappingMixin,ToggleXMixin,LuminanceMixin):
         if info is None:
             return None
         return info.rgb_tuple
+    
