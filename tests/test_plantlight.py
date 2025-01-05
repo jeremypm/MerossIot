@@ -104,10 +104,11 @@ class TestPlantLight(AioHTTPTestCase):
         print("Getting color - Light A")
         rgb = dev.get_rgb_color(channel = 1)
         print(rgb)
-        
+        desiredLuminance = 50
         print("Setting brightness - Light A")
-        await dev.async_set_light_color(channel = 1, luminance = 50)
+        await dev.async_set_light_color(channel = 1, luminance = desiredLuminance)
         await asyncio.sleep(5)
 
         print("Getting color - Light A")
         self.assertEqual(rgb, dev.get_rgb_color(channel = 1))
+        self.assertEqual(desiredLuminance, dev.get_luminance(channel = 1))
