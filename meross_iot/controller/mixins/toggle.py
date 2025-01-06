@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from meross_iot.controller.device import BaseDevice
 from meross_iot.model.enums import Namespace
 from meross_iot.controller.mixins.utilities import DynamicFilteringMixin
 _LOGGER = logging.getLogger(__name__)
@@ -35,10 +36,8 @@ class ToggleMixin(DynamicFilteringMixin):
                 self._channel_toggle_status[channel_index] = switch_state
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
@@ -49,8 +48,7 @@ class ToggleMixin(DynamicFilteringMixin):
             switch_state = payload['onoff'] == 1
             self._channel_toggle_status[channel_index] = switch_state
             locally_handled = True
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     def is_on(self, channel=0, *args, **kwargs) -> Optional[bool]:
         self.check_full_update_done()
@@ -123,13 +121,10 @@ class ToggleXMixin(ToggleMixin):
                 self._channel_togglex_status[channel] = switch_state
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+        return locally_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
-        _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
+        _LOGGER.debug(f"Handling {__name__} mixin data update.")
         locally_handled = False
         if namespace == Namespace.SYSTEM_ALL:
             payload = data.get('all', {}).get('digest', {}).get('togglex', [])
@@ -139,8 +134,7 @@ class ToggleXMixin(ToggleMixin):
                 self._channel_togglex_status[channel] = switch_state
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     def is_on(self, channel=0, *args, **kwargs) -> Optional[bool]:
         """

@@ -44,10 +44,7 @@ class DiffuserLightMixin(DynamicFilteringMixin):
 
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+        return locally_handled
 
     def get_light_mode(self, channel: int = 0, *args, **kwargs) -> Optional[DiffuserLightMode]:
         """
@@ -72,8 +69,7 @@ class DiffuserLightMixin(DynamicFilteringMixin):
                 self._channel_diffuser_light_status[channel] = l
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     def get_light_brightness(self, channel: int = 0, *args, **kwargs) -> Optional[int]:
         """

@@ -65,10 +65,8 @@ class GarageOpenerMixin(DynamicFilteringMixin):
                     self._door_config_state_by_channel[channel_index] = door
                     locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     async def async_handle_update(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {self.__class__.__name__} mixin data update.")
@@ -81,8 +79,7 @@ class GarageOpenerMixin(DynamicFilteringMixin):
                 self._door_open_state_by_channel[channel_index] = state
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     async def async_open(self, channel: Optional[int] = None, *args, **kwargs) -> None:
         """

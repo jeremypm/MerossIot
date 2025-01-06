@@ -47,9 +47,7 @@ class SystemRuntimeMixin(DynamicFilteringMixin):
         """
         return self._runtime_info
 
-    async def async_update(self,
+    async def _async_request_update(self,
                            *args,
                            **kwargs) -> None:
-        # call the superclass implementation first
-        await super().async_update(*args, **kwargs)
         await self.async_update_runtime_info()

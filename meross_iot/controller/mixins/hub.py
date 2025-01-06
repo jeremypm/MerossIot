@@ -50,10 +50,8 @@ class HubMixn(DynamicFilteringMixin):
                         await subdev.async_handle_subdevice_notification(namespace=namespace, data=subdev_state)
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
 
 class HubMs100Mixin(DynamicFilteringMixin):
@@ -76,10 +74,7 @@ class HubMs100Mixin(DynamicFilteringMixin):
     def filter(device_ability : str, device_name : str,**kwargs):
         return device_ability == Namespace.HUB_SENSOR_ALL.value or device_ability == Namespace.HUB_SENSOR_ALERT.value or device_ability == Namespace.HUB_SENSOR_TEMPHUM.value
     
-    async def async_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
-        # Call the super implementation
-        await super().async_update(*args, **kwargs)
-
+    async def _async_request_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
         result = await self._execute_command(method="GET",
                                              namespace=Namespace.HUB_SENSOR_ALL,
                                              payload={'all': []},
@@ -122,10 +117,8 @@ class HubMs100Mixin(DynamicFilteringMixin):
                         await subdev.async_handle_subdevice_notification(namespace=namespace, data=subdev_state)
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
 
 class HubMts100Mixin(DynamicFilteringMixin):
@@ -147,11 +140,8 @@ class HubMts100Mixin(DynamicFilteringMixin):
     def filter(device_ability : str, device_name : str,**kwargs):
         return device_ability == Namespace.HUB_MTS100_ALL.value or device_ability == Namespace.HUB_MTS100_MODE.value or device_ability == Namespace.HUB_MTS100_TEMPERATURE.value
     
-    async def async_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
+    async def _async_request_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
         try:
-            # Call the super implementation
-            await super().async_update(timeout=timeout, *args, **kwargs)
-
             result = await self._execute_command(method="GET",
                                                  namespace=Namespace.HUB_MTS100_ALL,
                                                  payload={'all': []},
@@ -196,7 +186,5 @@ class HubMts100Mixin(DynamicFilteringMixin):
                         if locally_handled:
                             break
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled

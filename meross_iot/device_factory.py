@@ -62,24 +62,77 @@ def _load_mixins(packageName = "meross_iot.controller.mixins"):
     
     for moduleName in pkgutil.iter_modules(sys.modules[packageName].__path__):       
         module = import_module(f'{packageName}.{moduleName.name}')
+
         for name, obj in inspect.getmembers(module):
             if inspect.isclass(obj):
                 # Ignore things in the utilities namespace
                 if obj.__module__ == "meross_iot.controller.mixins.utilities":
                     continue
+
                 # Only load dynamically-filterable mixins
                 if issubclass(obj,DynamicFilteringMixin):
                     dynamic_plugins[name] = obj
 
-def _dynamic_filter(device_ability : str,device_type : str):
+def _add_classes_for_ability(device_ability : str,device_type : str, mixin_classes):
      # Load dynamic modules - if required.
     _load_mixins()
-    for name,obj in dynamic_plugins.items():
+    loadedClasses = False
+    for name,clazz in dynamic_plugins.items():
         _LOGGER.debug(f'Testing mixin: {name} for {device_type}')
         # Try filtering
-        if obj.filter(device_ability,device_type) == True:
-            return obj
-    return None
+        if clazz.filter(device_ability,device_type) == True:
+            shouldAdd = True
+
+            # Some devices will expose the same ability like Tooggle and ToogleX. This loop confirms that we prefer the X version.
+            for existingClass in mixin_classes:
+                if clazz == existingClass:
+                    # We don't want to add the same class multiple times. In the case we do (due to an overly-permissive filter)
+                    # Drop out of this loop and carry on to the next plugin
+                    shouldAdd = False 
+                    # Lie and say we were successful on the return status
+                    loadedClasses = True 
+                else:
+                    # We need to first test if a we already have a subclassed mixin cached. This means the X version has already been found.
+                    if issubclass(existingClass,clazz):
+                        shouldAdd = False
+                        continue
+                    # We prefer the X version by testing if we have any parent classes of class returned by _dynamic_filter
+                    if issubclass(clazz,existingClass):
+                        # Erase old class
+                        mixin_classes.remove(existingClass)
+                        shouldAdd = True
+                        break
+            if shouldAdd: # Just add
+                mixin_classes.append(clazz)
+                _LOGGER.debug(f'Loaded mixin: {name} for {device_type}')
+
+                loadedClasses = True
+
+    return loadedClasses
+
+    """ 
+    def _add_mixin_class(clazz, mixin_classes):
+    shouldAdd = True
+
+    # Some devices will expose the same ability like Tooggle and ToogleX. This confirms that we prefer the X version.
+    for existingClass in mixin_classes:
+            # We need to first test if a we already have a subclassed mixin cached. This means the X version has already been found.
+            if issubclass(existingClass,clazz):
+                shouldAdd = False
+                continue
+            # We prefer the X version by testing if we have any parent classes of class returned by _dynamic_filter
+            if issubclass(clazz,existingClass):
+                # Erase old class
+                mixin_classes.remove(existingClass)
+                shouldAdd = True
+                break
+    if shouldAdd: # Just add
+        mixin_classes.add(clazz)
+        loadedClasses = True
+
+    return shouldAdd
+    """
+    
 
 def _build_cached_type(type_string: str, device_abilities: dict, base_class: type,device_type : str) -> type:
     """
@@ -90,36 +143,18 @@ def _build_cached_type(type_string: str, device_abilities: dict, base_class: typ
     :return:
     """
     # Build a specific type at runtime by mixing plugins on-demand
-    mixin_classes = set()
+    mixin_classes = list()
     # Add plugins via filtering
-    for key, val in device_abilities.items():
-        clazz = _dynamic_filter(key,device_type)
-        
-        if clazz != None:
-            addClass = True
-            # Some devices will expose the same ability like Tooggle and ToogleX. This loops confirms that we prefer the X version.
-            for existingClass in mixin_classes:
-                if clazz != existingClass:
-                    # We need to first test if a we already have a subclassed mixin cached. This means the X version has already been found.
-                    if issubclass(existingClass,clazz):
-                        addClass = False
-                        continue
-                    # We prefer the X version by testing if we have any parent classes of class returned by _dynamic_filter
-                    if issubclass(clazz,existingClass):
-                        # Erase old class
-                        mixin_classes.remove(existingClass)
-                        addClass = True
-                        break
-            # Only add class if required
-            if addClass == True:
-                mixin_classes.add(clazz)
-        else:
-            _LOGGER.warning(f'Could not find dynamic mixin for {key}/{device_type}')
-       
+    _load_mixins()
+    # We run through each plugin and try filtering on it until it matches. This allows us to prevent scanning to
+    # check if we've already loaded a plugin
+    for device_ability in device_abilities:
+        _add_classes_for_ability(device_ability,device_type,mixin_classes)
+
     # We must be careful when ordering the mixin and leaving the BaseMerossDevice as last class.
     # Messing up with that will cause MRO to not resolve inheritance correctly.
-    mixin_classes = list(mixin_classes)
     mixin_classes.append(base_class)
+
     m = type(type_string, tuple(mixin_classes), {"_abilities_spec": device_abilities})
     return m
 

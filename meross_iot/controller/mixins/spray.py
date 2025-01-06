@@ -45,10 +45,8 @@ class SprayMixin(DynamicFilteringMixin):
 
                 locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     def get_current_mode(self, channel: int = 0, *args, **kwargs) -> Optional[SprayMode]:
         self.check_full_update_done()
@@ -66,8 +64,7 @@ class SprayMixin(DynamicFilteringMixin):
                 self._channel_spray_status[channel] = mode
             locally_handled = True
 
-        super_handled = await super().async_handle_update(namespace=namespace, data=data)
-        return super_handled or locally_handled
+        return locally_handled
 
     async def async_set_mode(self, mode: SprayMode, channel: int = 0, timeout: Optional[float] = None, *args, **kwargs) -> None:
         payload = {'spray': {'channel': channel, 'mode': mode.value}}

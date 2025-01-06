@@ -63,10 +63,8 @@ class RollerShutterTimerMixin(DynamicFilteringMixin):
                     self._shutter__position_by_channel[channel_index] = position
                     locally_handled = True
 
-        # Always call the parent handler when done with local specific logic. This gives the opportunity to all
-        # ancestors to catch all events.
-        parent_handled = await super().async_handle_push_notification(namespace=namespace, data=data)
-        return locally_handled or parent_handled
+
+        return locally_handled
 
     async def async_open(self, channel: int = 0, *args, **kwargs) -> None:
         """
@@ -112,9 +110,7 @@ class RollerShutterTimerMixin(DynamicFilteringMixin):
     async def async_set_position(self, position: int, channel: int = 0, timeout: Optional[float] = None, *args, **kwargs) -> None:
         return await self._async_operate(position=position, channel=channel, timeout=timeout, *args, **kwargs)
 
-    async def async_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
-        # Call the super implementation
-        await super().async_update(*args, **kwargs)
+    async def _async_request_update(self, timeout: Optional[float] = None, *args, **kwargs) -> None:
         # Update the configuration at the same time
         await self.async_fetch_config()
         await self.async_fetch_position()
