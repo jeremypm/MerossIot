@@ -43,6 +43,27 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
                 ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)
                 ]
     
+    def _update_main_channel(self):
+        # Average out RGB and luminance values
+        rgb = None
+        luminance = None
+        onOff = False
+        for channel in self._channel_light_status[1 : ]:
+            if rgb == None:
+                rgb = channel.rgb_tuple
+            else:
+                rgb = ((rgb[0] + channel.rgb_tuple[0]) / 2,
+                       (rgb[1] + channel.rgb_tuple[1]) / 2,
+                       (rgb[2] + channel.rgb_tuple[2]) / 2)
+            if luminance == None:
+                luminance = channel.luminance
+            else:
+                luminance = (luminance + channel.luminance) / 2
+            
+            onOff = onOff or channel.onoff
+
+        self._override_channel_status(0,luminance,rgb,onOff)
+
     def _override_channel_status(self,
                                channel: int = 0,
                                luminance : int = None,
@@ -54,6 +75,9 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
             self._channel_light_status[channel] = channel_info
 
         channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
+        # Nullify master channel since it's likely out of data
+        if channel != 0:
+            self._update_main_channel()
     
     def _calculate_scaling_factor(self,luminance):
         # We actually need to scale this twice - Once to get the 8-bit values for RGB into the 0-100 of luminance - This is easy, use a forced scaling factor of 2.55
@@ -82,6 +106,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
                 0,
                 self._channel_luminance_status[realChannel + self.BLUE_OFFSET]/scalingFactor)
         channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
+        self._update_main_channel()
     
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
         _LOGGER.debug(f"Handling {__name__} mixin push notification. Namespace: {namespace} Data: {data}")
@@ -138,6 +163,8 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
         if channel == 0:
             await self.async_set_light_color(1,onoff,rgb,luminance,timeout)
             await self.async_set_light_color(2,onoff,rgb,luminance,timeout)
+            # Since this channel is fake anyway, we can update the status of it
+            self._override_channel_status(0)
             return 
         # Handle turn-on/turn off cases - These smart lights only allow on/off for the main channels (e.g. light A and B)
         # they implement this via ToggleX
