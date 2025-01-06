@@ -52,7 +52,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
         for name,channel in self._channel_light_status.items():
             if name == 0:
                 continue
-              
+
             if rgb == None:
                 rgb = channel.rgb_tuple
             elif channel.rgb_tuple != None:
@@ -64,7 +64,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
             elif channel.luminance != None:
                 luminance = (luminance + channel.luminance) / 2
             
-            onOff = onOff or channel.onoff
+            onOff = onOff or channel.is_on
 
         self._override_channel_status(0,luminance,rgb,onOff)
 
