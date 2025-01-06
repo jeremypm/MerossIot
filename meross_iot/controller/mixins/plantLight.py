@@ -19,8 +19,8 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
     check_full_update_done: callable
 
     WHITE_OFFSET = 0
-    RED_OFFSET = 1
-    BLUE_OFFSET = 2
+    BLUE_OFFSET = 1
+    RED_OFFSET = 2
 
     # async_handle_update: Callable[[Namespace, dict], Awaitable]
 
@@ -48,14 +48,21 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
                                luminance : int = None,
                                rgb : RgbTuple = None,
                                onoff: int = None) -> None:
-        realChannel = (channel * 4) - 1
         channel_info = self._channel_light_status.get(channel)
         if channel_info is None:
             channel_info = LightInfo(luminance=0)
             self._channel_light_status[channel] = channel_info
 
         channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
-
+    
+    def _calculate_scaling_factor(self,luminance):
+        # We actually need to scale this twice - Once to get the 8-bit values for RGB into the 0-100 of luminance - This is easy, use a forced scaling factor of 2.55
+        # then we need to scale by the luminance value
+        if luminance != None:
+            return (luminance / 100.0) / 2.55
+        else:
+            return 2.55
+    
     def _update_channel_status(self,
                                channel: int = 0,
                                onoff: int = None) -> None:
@@ -67,20 +74,17 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
 
         rgb = None
         luminance = self._channel_luminance_status.get(realChannel + self.WHITE_OFFSET,self._channel_light_status[channel].luminance)
-        if luminance != None:
-            scaleFactor = luminance / 100.0
-        else:
-            scaleFactor = 1.0
+        scalingFactor = self._calculate_scaling_factor(luminance)
         # We may not receive all updates right at the startup, so we need to check if the relevant channels exist. However,
         # the lights will always return the range of channels relevant to a single light
         if realChannel in self._channel_luminance_status:
-            rgb = (self._channel_luminance_status[realChannel + self.RED_OFFSET]/scaleFactor,
+            rgb = (self._channel_luminance_status[realChannel + self.RED_OFFSET]/scalingFactor,
                 0,
-                self._channel_luminance_status[realChannel + self.BLUE_OFFSET]/scaleFactor)
+                self._channel_luminance_status[realChannel + self.BLUE_OFFSET]/scalingFactor)
         channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
     
     async def async_handle_push_notification(self, namespace: Namespace, data: dict) -> bool:
-        _LOGGER.debug(f"Handling {__name__} mixin data update. Namespace: {namespace} Data: {data}")
+        _LOGGER.debug(f"Handling {__name__} mixin push notification. Namespace: {namespace} Data: {data}")
 
         parent_handled = await LuminanceMixin.async_handle_push_notification(self,namespace=namespace, data=data)
         parent_handled2 = await ToggleXMixin.async_handle_push_notification(self,namespace=namespace, data=data) 
@@ -149,7 +153,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
             realChannel = (channel * 4) - 1
 
             # These lights don't seem to have a master luminance channel, we have to do it ourselves. However, the white channel is always
-            # at 100%, so we use it as a point-of-reference. 
+            # at 100%, so we use it as a point-of-reference. This is based on watching packet captures from the BBSolar app.
             if luminance is None:        
                 # Get cached luminance value, use as reference
                 luminance = self._channel_light_status[channel].luminance
@@ -157,9 +161,10 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
             # If no RGB value has been selected, use the old one      
             if rgb is None:
                 rgb = self._channel_light_status[channel].rgb_tuple
-            # Scale 
-            scaleFactor = luminance / 100.0
-            rgbScaled = (int(rgb[0] * scaleFactor), int(rgb[1] * scaleFactor), int(rgb[2] * scaleFactor))
+            
+            scalingFactor = self._calculate_scaling_factor(luminance)
+
+            rgbScaled = (int(rgb[0] * scalingFactor), int(rgb[1] * scalingFactor), int(rgb[2] * scalingFactor))
 
             # Send update
             await self.async_bulk_set_luminance({realChannel + self.WHITE_OFFSET: luminance, realChannel + self.RED_OFFSET: rgbScaled[0], realChannel + self.BLUE_OFFSET: rgbScaled[2]},timeout)
