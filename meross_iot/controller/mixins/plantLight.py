@@ -48,16 +48,20 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
         rgb = None
         luminance = None
         onOff = False
-        for channel in self._channel_light_status[1 : ]:
+        
+        for name,channel in self._channel_light_status.items():
+            if name == 0:
+                continue
+              
             if rgb == None:
                 rgb = channel.rgb_tuple
-            else:
+            elif channel.rgb_tuple != None:
                 rgb = ((rgb[0] + channel.rgb_tuple[0]) / 2,
                        (rgb[1] + channel.rgb_tuple[1]) / 2,
                        (rgb[2] + channel.rgb_tuple[2]) / 2)
             if luminance == None:
                 luminance = channel.luminance
-            else:
+            elif channel.luminance != None:
                 luminance = (luminance + channel.luminance) / 2
             
             onOff = onOff or channel.onoff
@@ -75,7 +79,7 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
             self._channel_light_status[channel] = channel_info
 
         channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
-        # Nullify master channel since it's likely out of data
+        # Nullify master channel since it's likely out of date
         if channel != 0:
             self._update_main_channel()
     
