@@ -43,6 +43,19 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
                 ChannelInfo(index=2, name="Light B", channel_type=type, is_master_channel=False)
                 ]
     
+    def _override_channel_status(self,
+                               channel: int = 0,
+                               luminance : int = None,
+                               rgb : RgbTuple = None,
+                               onoff: int = None) -> None:
+        realChannel = (channel * 4) - 1
+        channel_info = self._channel_light_status.get(channel)
+        if channel_info is None:
+            channel_info = LightInfo(luminance=0)
+            self._channel_light_status[channel] = channel_info
+
+        channel_info.update(rgb=rgb, luminance = luminance, onoff=onoff)
+
     def _update_channel_status(self,
                                channel: int = 0,
                                onoff: int = None) -> None:
@@ -141,16 +154,16 @@ class PlantLightMixin(ChannelRemappingMixin,LightMixin,ToggleXMixin,LuminanceMix
                 # Get cached luminance value, use as reference
                 luminance = self._channel_light_status[channel].luminance
                 
-            # Handle color updates        
+            # If no RGB value has been selected, use the old one      
             if rgb is None:
                 rgb = self._channel_light_status[channel].rgb_tuple
-                # Scale 
-                scaleFactor = luminance / 100.0
-                rgb = (int(rgb[0] * scaleFactor), int(rgb[1] * scaleFactor), int(rgb[2] * scaleFactor))
+            # Scale 
+            scaleFactor = luminance / 100.0
+            rgbScaled = (int(rgb[0] * scaleFactor), int(rgb[1] * scaleFactor), int(rgb[2] * scaleFactor))
 
             # Send update
-            await self.async_bulk_set_luminance({realChannel + self.WHITE_OFFSET: luminance, realChannel + self.RED_OFFSET: rgb[0], realChannel + self.BLUE_OFFSET: rgb[2]},timeout)
-
+            await self.async_bulk_set_luminance({realChannel + self.WHITE_OFFSET: luminance, realChannel + self.RED_OFFSET: rgbScaled[0], realChannel + self.BLUE_OFFSET: rgbScaled[2]},timeout)
+            self._override_channel_status(channel,luminance = luminance, rgb = rgb, onoff=onoff)
         else:
             _LOGGER.warning(f"Cannot set values for indvidual LED's")
         

@@ -74,19 +74,20 @@ class TestPlantLight(AioHTTPTestCase):
         #return
         
     @unittest_run_loop
-    async def test_set_color(self):
+    async def test_set_color_and_luminance(self):
          # Try turning off the first object we find
         dev = self.plant_lights[0]
         rgbValue = (90,0,100)
 
-        print("Setting color - Light A")
-        await dev.async_set_light_color(channel = 1, rgb = rgbValue, luminance = 100)
+        print("Setting color with luminance - Light A")
+        await dev.async_set_light_color(channel = 1, rgb = rgbValue,luminance = 100)
         await asyncio.sleep(5)
 
         print("Getting color - Light A")
         rgb = dev.get_rgb_color(channel = 1)
 
         self.assertEqual(rgb,rgbValue)
+        rgbValue2 = (90,0,100)
 
         print("Setting color - Light B")
         await dev.async_set_light_color(channel = 2, rgb = rgbValue, luminance = 100)
@@ -96,6 +97,26 @@ class TestPlantLight(AioHTTPTestCase):
         rgb = dev.get_rgb_color(channel = 2)
 
         self.assertEqual(rgb,rgbValue)
+
+    @unittest_run_loop
+    async def test_set_color_without_luminance(self):
+         # Try turning off the first object we find
+        dev = self.plant_lights[0]
+        rgbValue = (90,0,100)
+        desiredLuminance = 50
+        print("Setting brightness - Light A")
+        await dev.async_set_light_color(channel = 1, luminance = desiredLuminance)
+
+        print("Setting color with luminance - Light A")
+        await dev.async_set_light_color(channel = 1, rgb = rgbValue)
+        await asyncio.sleep(5)
+
+        print("Getting color - Light A")
+        rgb = dev.get_rgb_color(channel = 1)
+
+        self.assertEqual(rgb,rgbValue)
+        self.assertEqual(desiredLuminance, dev.get_luminance(channel = 1))
+
 
     @unittest_run_loop
     async def test_set_brightness(self):
